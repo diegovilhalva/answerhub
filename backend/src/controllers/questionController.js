@@ -64,7 +64,7 @@ export async function createQuestion(req, res, next) {
       return res.status(400).json({ message: 'Title and body are required' });
     }
 
-   
+
     const tagsArray = Array.isArray(tags) ? tags : String(tags).split(',');
 
     const normalizedTags = [
@@ -91,6 +91,44 @@ export async function createQuestion(req, res, next) {
 
     res.status(201).json(question);
   } catch (error) {
+    next(error);
+  }
+}
+
+
+export const editQuestion = async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { title, body, tags = [] } = req.body
+
+    const question = await Question.findOne({ _id: id, author: req.user._id })
+
+    if (!question) {
+      return res.status(404).json({ message: "Question not found" })
+    }
+
+
+
+    const tagsArray = Array.isArray(tags) ? tags : String(tags).split(',');
+
+    const normalizedTags = [
+      ...new Set(tagsArray.map((t) => t.toLowerCase().trim()).filter(Boolean)),
+    ].slice(0, 5);
+
+    question.title = title
+    question.body = body
+
+   
+    const totalTags = [...new Set([...question.tags, ...normalizedTags])];
+
+    
+    question.tags = totalTags.slice(0, 5);
+
+    await question.save()
+
+    res.json(question)
+  } catch (error) {
+    console.log(error)
     next(error);
   }
 }
