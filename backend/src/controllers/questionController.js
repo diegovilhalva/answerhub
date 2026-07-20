@@ -64,7 +64,12 @@ export async function createQuestion(req, res, next) {
       return res.status(400).json({ message: 'Title and body are required' });
     }
 
-    const normalizedTags = [...new Set(tags.map((t) => t.toLowerCase().trim()))].slice(0, 5);
+   
+    const tagsArray = Array.isArray(tags) ? tags : String(tags).split(',');
+
+    const normalizedTags = [
+      ...new Set(tagsArray.map((t) => t.toLowerCase().trim()).filter(Boolean)),
+    ].slice(0, 5);
 
     const question = await Question.create({
       title,
