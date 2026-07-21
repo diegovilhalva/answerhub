@@ -29,7 +29,11 @@ async function submit() {
 
 <template>
   <div class="container auth-page">
+
     <div class="card auth-card">
+      <div class="logo-card">
+        <img src="../assets/logo.png" class="logo" alt="AnswerHub Logo">
+      </div>
       <h1>Log in</h1>
       <p v-if="error" class="error-banner">{{ error }}</p>
       <form @submit.prevent="submit">
@@ -45,7 +49,8 @@ async function submit() {
           {{ loading ? 'Logging in…' : 'Log in' }}
         </button>
       </form>
-      <p class="switch">No account? <RouterLink to="/register">Sign up</RouterLink></p>
+      <p class="switch">No account? <RouterLink to="/register">Sign up</RouterLink>
+      </p>
     </div>
   </div>
 </template>
@@ -66,6 +71,17 @@ async function submit() {
 .auth-card h1 {
   margin-bottom: 18px;
 }
+.logo-card {
+  display: flex;
+  justify-content: center;
+  margin-bottom: .5rem;
+}
+
+.logo{
+  width: 25%;
+  object-fit: cover;
+}
+
 
 .switch {
   font-size: var(--step--1);

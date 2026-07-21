@@ -15,8 +15,7 @@ function handleLogout() {
   <header class="app-header">
     <div class="container bar">
       <RouterLink to="/" class="brand">
-        <span class="brand-mark">▣</span>
-        AnswerHub
+        <img src="../assets/logo.png" class="logo" alt="">
       </RouterLink>
 
       <nav class="nav">
@@ -73,7 +72,11 @@ function handleLogout() {
   align-items: center;
   gap: 16px;
 }
-
+.logo {
+  width: fit-content;
+  height: 48px;
+  object-fit: cover;
+}
 .nav-link {
   font-size: var(--step--1);
   font-weight: 600;
