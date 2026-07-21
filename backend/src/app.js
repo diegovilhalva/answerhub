@@ -7,6 +7,7 @@ import answerRoutes from './routes/answerRoutes.js';
 import voteRoutes from './routes/voteRoutes.js';
 import tagRoutes from './routes/tagRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorHandler.js';
 
 const app = express();
@@ -22,6 +23,7 @@ app.use('/api/answers', answerRoutes);
 app.use('/api/votes', voteRoutes);
 app.use('/api/tags', tagRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
