@@ -95,7 +95,7 @@ export async function createQuestion(req, res, next) {
   }
 }
 
-
+// PATCH /:id/Edit
 export const editQuestion = async (req, res, next) => {
   try {
     const { id } = req.params
@@ -115,20 +115,24 @@ export const editQuestion = async (req, res, next) => {
       ...new Set(tagsArray.map((t) => t.toLowerCase().trim()).filter(Boolean)),
     ].slice(0, 5);
 
-    question.title = title
-    question.body = body
+    const newTags = normalizedTags.filter((t) => !question.tags.includes(t));
+    await Promise.all(newTags.map((name) =>
+      Tag.findOneAndUpdate({ name }, { $inc: { questionCount: 1 } }, { upsert: true })
+    ));
 
-   
+    if (title !== undefined) question.title = title;
+    if (body !== undefined) question.body = body;
+
+
     const totalTags = [...new Set([...question.tags, ...normalizedTags])];
 
-    
+
     question.tags = totalTags.slice(0, 5);
 
     await question.save()
 
     res.json(question)
   } catch (error) {
-    console.log(error)
     next(error);
   }
 }

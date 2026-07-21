@@ -14,8 +14,8 @@ const router = Router();
 router.get('/', listQuestions);
 router.get('/:id', optionalAuth, getQuestion);
 router.post('/', protect, createQuestion);
+router.patch("/:id/edit", protect, editQuestion)
 router.post('/:id/answers', protect, createAnswer);
 router.patch('/:id/accept/:answerId', protect, acceptAnswer);
-router.patch("/:id/edit", protect, editQuestion)
 
 export default router;
