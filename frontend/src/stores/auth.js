@@ -27,6 +27,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { data } = await authApi.me();
         this.user = data;
+        console.log(data)
       } catch {
         this.logout();
       } finally {

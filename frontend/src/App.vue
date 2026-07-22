@@ -1,14 +1,24 @@
-<script setup lang="ts">
-import AppHeader from "./components/AppHeader.vue"
+<script setup>
+import { onMounted } from 'vue';
+import { useAuthStore } from './stores/auth.js';
+import AppHeader from './components/AppHeader.vue';
+
+const auth = useAuthStore();
+
+onMounted(() => {
+  if (auth.token) auth.fetchMe();
+});
 </script>
 
 <template>
   <AppHeader />
-  <main>
+  <main class="main">
     <RouterView />
   </main>
 </template>
 
 <style scoped>
-/* Estilos específicos do layout raiz, se necessário */
+.main {
+  flex: 1;
+}
 </style>
