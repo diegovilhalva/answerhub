@@ -161,6 +161,16 @@ function handleLogout() {
     display: flex;
   }
 
+  .mobile-toggle span:nth-child(1).open {
+  transform: translateY(8px) rotate(45deg);
+}
+.mobile-toggle span:nth-child(2).open {
+  opacity: 0;
+}
+.mobile-toggle span:nth-child(3).open {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
   .nav {
     position: absolute;
     top: 60px;

@@ -81,7 +81,7 @@ onMounted(load);
 
     <template v-else-if="profile">
       <div class="card profile-header">
-        <img :src="avatarPreview || profile.avatar || 'https://placehold.co/96x96'" class="avatar" alt="" />
+        <img :src="avatarPreview || auth.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (auth.user?.name || 'default')" class="avatar" alt="" />
         <div class="info">
           <h1>{{ profile.name }}</h1>
           <p class="meta">reputation: {{ profile.reputation }} · role: {{ profile.role }}</p>

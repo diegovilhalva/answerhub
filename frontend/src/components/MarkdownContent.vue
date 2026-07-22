@@ -1,22 +1,28 @@
 <script setup>
 import { computed } from 'vue';
-import { marked } from 'marked';
+import { Marked } from 'marked';
+import { markedHighlight } from 'marked-highlight';
 import DOMPurify from 'dompurify';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/atom-one-dark.css';
 
 const props = defineProps({
   source: { type: String, default: '' },
 });
 
-marked.setOptions({
-  highlight(code, lang) {
-    if (lang && hljs.getLanguage(lang)) {
-      return hljs.highlight(code, { language: lang }).value;
-    }
-    return hljs.highlightAuto(code).value;
-  },
-});
+const marked = new Marked(
+  markedHighlight({
+    langPrefix: 'hljs language-',
+    highlight(code, lang) {
+     
+      if (lang && hljs.getLanguage(lang)) {
+        return hljs.highlight(code, { language: lang }).value;
+      }
+      
+      return hljs.highlightAuto(code).value;
+    },
+  })
+);
+
 
 const html = computed(() => DOMPurify.sanitize(marked.parse(props.source || '')));
 </script>
@@ -24,6 +30,12 @@ const html = computed(() => DOMPurify.sanitize(marked.parse(props.source || ''))
 <template>
   <div class="markdown-body" v-html="html"></div>
 </template>
+
+
+<style>
+@import 'highlight.js/styles/atom-one-dark.css';
+</style>
+
 
 <style scoped>
 .markdown-body {
@@ -43,6 +55,10 @@ const html = computed(() => DOMPurify.sanitize(marked.parse(props.source || ''))
   font-family: var(--font-mono);
   font-size: 0.85rem;
   margin: 12px 0;
+}
+
+.markdown-body :deep(pre code) {
+  color: #abb2bf;
 }
 
 .markdown-body :deep(code) {
