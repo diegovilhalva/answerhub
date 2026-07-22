@@ -81,11 +81,22 @@ onMounted(load);
 
     <template v-else-if="profile">
       <div class="card profile-header">
-        <img :src="avatarPreview || auth.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (auth.user?.name || 'default')" class="avatar" alt="" />
+        <img
+          :src="avatarPreview || auth.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (auth.user?.name || 'default')"
+          class="avatar" alt="" />
         <div class="info">
           <h1>{{ profile.name }}</h1>
           <p class="meta">reputation: {{ profile.reputation }} · role: {{ profile.role }}</p>
-          <p v-if="profile.bio && !editing" class="bio">{{ profile.bio }}</p>
+          <p v-if="profile.bio && !editing" class="bio">{{ profile.bio }}
+
+          </p>
+          <p>
+            member since {{ new Date(profile.createdAt).toLocaleDateString("en-US", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric"
+            }) }}
+          </p>
         </div>
         <button v-if="isOwnProfile && !editing" class="btn btn-secondary" @click="editing = true">
           Edit profile
@@ -127,12 +138,7 @@ onMounted(load);
           <h2>Answers</h2>
           <div v-if="!answers.length" class="state-msg small">No answers yet.</div>
           <div class="list">
-            <RouterLink
-              v-for="a in answers"
-              :key="a._id"
-              :to="`/questions/${a.question}`"
-              class="card answer-snippet"
-            >
+            <RouterLink v-for="a in answers" :key="a._id" :to="`/questions/${a.question}`" class="card answer-snippet">
               {{ a.body.slice(0, 140) }}{{ a.body.length > 140 ? '…' : '' }}
             </RouterLink>
           </div>
@@ -153,6 +159,7 @@ onMounted(load);
   gap: 18px;
   padding: 20px;
   margin-bottom: 20px;
+  flex-wrap: wrap; /* permite quebrar em telas pequenas */
 }
 
 .avatar {
@@ -228,5 +235,7 @@ onMounted(load);
   .activity {
     grid-template-columns: 1fr;
   }
+   
 }
+
 </style>
