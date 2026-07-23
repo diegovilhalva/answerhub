@@ -82,14 +82,12 @@ onMounted(load);
     <template v-else-if="profile">
       <div class="card profile-header">
         <img
-          :src="avatarPreview || auth.user?.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (auth.user?.name || 'default')"
+          :src="avatarPreview || profile.avatar || 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + (profile.name || 'default')"
           class="avatar" alt="" />
         <div class="info">
           <h1>{{ profile.name }}</h1>
           <p class="meta">reputation: {{ profile.reputation }} · role: {{ profile.role }}</p>
-          <p v-if="profile.bio && !editing" class="bio">{{ profile.bio }}
-
-          </p>
+          <p v-if="profile.bio && !editing" class="bio">{{ profile.bio }}</p>
           <p>
             member since {{ new Date(profile.createdAt).toLocaleDateString("en-US", {
               day: "2-digit",
@@ -159,7 +157,7 @@ onMounted(load);
   gap: 18px;
   padding: 20px;
   margin-bottom: 20px;
-  flex-wrap: wrap; /* permite quebrar em telas pequenas */
+  flex-wrap: wrap;
 }
 
 .avatar {
@@ -235,7 +233,6 @@ onMounted(load);
   .activity {
     grid-template-columns: 1fr;
   }
-   
-}
 
+}
 </style>
