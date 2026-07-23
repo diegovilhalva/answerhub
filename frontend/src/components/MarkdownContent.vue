@@ -3,7 +3,8 @@ import { computed } from 'vue';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import DOMPurify from 'dompurify';
-import hljs from 'highlight.js';
+import hljs from '../utils/hljs-lite.js';
+import 'highlight.js/styles/atom-one-dark.css';
 
 const props = defineProps({
   source: { type: String, default: '' },
@@ -13,16 +14,11 @@ const marked = new Marked(
   markedHighlight({
     langPrefix: 'hljs language-',
     highlight(code, lang) {
-     
-      if (lang && hljs.getLanguage(lang)) {
-        return hljs.highlight(code, { language: lang }).value;
-      }
-      
-      return hljs.highlightAuto(code).value;
+      const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+      return hljs.highlight(code, { language }).value;
     },
   })
 );
-
 
 const html = computed(() => DOMPurify.sanitize(marked.parse(props.source || '')));
 </script>
@@ -30,12 +26,6 @@ const html = computed(() => DOMPurify.sanitize(marked.parse(props.source || ''))
 <template>
   <div class="markdown-body" v-html="html"></div>
 </template>
-
-
-<style>
-@import 'highlight.js/styles/atom-one-dark.css';
-</style>
-
 
 <style scoped>
 .markdown-body {
