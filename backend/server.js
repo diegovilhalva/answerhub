@@ -9,3 +9,5 @@ connectDB().then(() => {
     console.log(`AnswerHub API running on port ${PORT}`);
   });
 });
+
+export default app;
