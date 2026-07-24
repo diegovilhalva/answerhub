@@ -9,11 +9,21 @@ import tagRoutes from './routes/tagRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import { notFound, errorHandler } from './middlewares/errorHandler.js';
+import { connectDB } from './config/db.js';
 
 const app = express();
 
 app.use(cors({ origin: process.env.CLIENT_URL || '*' }));
 app.use(express.json());
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ error:"Databsese connection error" });
+  }
+});
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 app.get('/', (_req, res) => res.json({ status: 'ok' }));
