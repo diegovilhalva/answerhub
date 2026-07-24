@@ -1,12 +1,14 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { adminApi } from '../api/endpoints.js';
+import { adminApi, questionsApi } from '../api/endpoints.js';
 import { useAuthStore } from '../stores/auth.js';
 
 const auth = useAuthStore();
 const stats = ref(null);
 const users = ref([]);
 const search = ref('');
+const questions = ref([]);
+const questionSearch = ref('');
 const loading = ref(true);
 const error = ref('');
 
@@ -22,6 +24,14 @@ async function loadStats() {
 async function loadUsers() {
   const { data } = await adminApi.listUsers({ search: search.value || undefined });
   users.value = data.users;
+}
+
+async function loadQuestions() {
+  const { data } = await questionsApi.list({
+    search: questionSearch.value || undefined,
+    limit: 20,
+  });
+  questions.value = data.questions;
 }
 
 async function changeRole(user, role) {
@@ -43,15 +53,33 @@ async function removeUser(user) {
   }
 }
 
+async function removeQuestion(question) {
+  if (!confirm(`Delete question "${question.title}"? This also deletes its answers.`)) return;
+  try {
+    await adminApi.deleteQuestion(question._id);
+    questions.value = questions.value.filter((q) => q._id !== question._id);
+    if (stats.value) stats.value.questions -= 1;
+  } catch (e) {
+    error.value = e.response?.data?.message || 'Could not delete question';
+  }
+}
+
 let searchTimeout;
 function onSearchInput() {
   clearTimeout(searchTimeout);
   searchTimeout = setTimeout(loadUsers, 300);
 }
 
+let questionSearchTimeout;
+function onQuestionSearchInput() {
+  clearTimeout(questionSearchTimeout);
+  questionSearchTimeout = setTimeout(loadQuestions, 300);
+}
+
 onMounted(async () => {
   loading.value = true;
   await loadStats();
+  await loadQuestions();
   if (auth.isAdmin) await loadUsers();
   loading.value = false;
 });
@@ -90,49 +118,81 @@ onMounted(async () => {
       </div>
     </div>
 
-    <template v-if="auth.isAdmin">
-      <h2 class="section-title">Users</h2>
-      <input
-        v-model="search"
-        type="search"
-        placeholder="Search by name or email…"
-        class="search-input"
-        @input="onSearchInput"
-      />
+    <h2 class="section-title">Questions</h2>
+    <input v-model="questionSearch" type="search" placeholder="Search questions…" class="search-input"
+      @input="onQuestionSearchInput" />
 
-      <table v-if="users.length" class="user-table">
+    <!-- Wrapper adicionado aqui para responsividade -->
+    <div class="table-responsive" v-if="questions.length">
+      <table class="user-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Reputation</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Answers</th>
+            <th>Votes</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="u in users" :key="u._id">
-            <td>{{ u.name }}</td>
-            <td class="meta">{{ u.email }}</td>
+          <tr v-for="q in questions" :key="q._id">
             <td>
-              <select :value="u.role" @change="changeRole(u, $event.target.value)">
-                <option value="user">user</option>
-                <option value="moderator">moderator</option>
-                <option value="admin">admin</option>
-              </select>
+              <RouterLink :to="`/questions/${q._id}`">{{ q.title }}</RouterLink>
             </td>
-            <td class="meta">{{ u.reputation }}</td>
+            <td class="meta">{{ q.author?.name }}</td>
+            <td class="meta">{{ q.answerCount }}</td>
+            <td class="meta">{{ q.votes }}</td>
             <td>
-              <button class="btn btn-danger" @click="removeUser(u)">Delete</button>
+              <button class="btn btn-danger" @click="removeQuestion(q)">Delete</button>
             </td>
           </tr>
         </tbody>
       </table>
+    </div>
+    <p v-else-if="!loading" class="state-msg small">No questions found.</p>
+
+    <template v-if="auth.isAdmin">
+      <h2 class="section-title">Users</h2>
+      <input v-model="search" type="search" placeholder="Search by name or email…" class="search-input"
+        @input="onSearchInput" />
+
+      <!-- Wrapper adicionado aqui para responsividade -->
+      <div class="table-responsive" v-if="users.length">
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Reputation</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="u in users" :key="u._id">
+              <td>{{ u.name }}</td>
+              <td class="meta">{{ u.email }}</td>
+              <td>
+                <select :value="u.role" @change="changeRole(u, $event.target.value)">
+                  <option value="user">user</option>
+                  <option value="moderator">moderator</option>
+                  <option value="admin">admin</option>
+                </select>
+              </td>
+              <td class="meta">{{ u.reputation }}</td>
+              <td>
+                <button class="btn btn-danger" @click="removeUser(u)">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <p v-else-if="!loading" class="state-msg small">No users found.</p>
     </template>
-    <p v-else class="meta">Moderators can view stats. User management is admin-only.</p>
+    <p v-else class="meta">User management is admin-only.</p>
   </div>
 </template>
+
 
 <style scoped>
 .admin-page {
@@ -198,21 +258,35 @@ onMounted(async () => {
   display: block;
 }
 
-.user-table {
+
+.table-responsive {
   width: 100%;
-  border-collapse: collapse;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;
+  
 }
 
 .user-table th,
 .user-table td {
   text-align: left;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--color-border);
   font-size: var(--step--1);
+}
+
+
+.user-table tr:last-child td {
+  border-bottom: none;
 }
 
 .user-table th {
@@ -221,15 +295,34 @@ onMounted(async () => {
   text-transform: uppercase;
   font-size: 0.7rem;
   color: var(--color-ink-soft);
+  white-space: nowrap;
+  /* Evita que o cabeçalho quebre em duas linhas */
 }
 
 .state-msg.small {
   color: var(--color-ink-soft);
 }
 
-@media (max-width: 640px) {
+/* Ajustes para Responsividade */
+@media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .search-input {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-page {
+    padding: 20px 16px 40px;
+   
+  }
+
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
